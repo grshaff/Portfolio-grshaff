@@ -31,12 +31,14 @@
             <h1 class="font-roboto font-medium text-gray-900 text-lg md:text-[24px] lg:text-[30px]">Projects</h1>
             <h2 class="mt-0.5 text-gray-700 text-[12px] md:text-[18px] lg:text-[20px] font-roboto">Recent projects I've worked on</h2>
         </div>
-        <div class="flex flex-wrap mx-auto" >
-            <projectCard/>
-            <projectCard/>
-            <projectCard/>
-            <projectCard/>
-            <projectCard/>
+        <div class="flex flex-wrap mx-auto " >
+            <projectCard
+                v-for="(project, index) in projects"
+                :key="index"
+                :projectName="project.name"
+                :projectDesc="project.desc"
+                :projectStatus="project.status"
+            />
         </div>
 
     </div>
@@ -47,4 +49,36 @@
     import projectCard from '../components/projectCard.vue'
     import carouselShowcase from '../components/carouselShow.vue'
 
+    const projectS = {
+        enjoyreads: {
+            name: "enjoyreads",
+            logo: "../",
+            desc: "A web application to read PDFs and ePUBs as books",
+            status: false,
+            URL: "#/",
+        },
+        revmycv: {
+            name: "reviewmycv",
+            logo: "../",
+            desc: "Quick CV reviewer built with AI to analyze and fix your resume.",
+            status: false,
+            URL: "#/",
+        },
+        shiftGen: {
+            name: "Shift Generator",
+            logo: "../",
+            desc: "Tool for generating shift schedules, creates excel as output",
+            status: true,
+            URL: "#/",
+        },
+        btps: {
+            name: "Bandung TPS Monitor",
+            logo: "../",
+            desc: "Web to monitor trash capacity in Bandung, connects with IoT developement",
+            status: true,
+            URL: "#/",
+        }
+    }
+
+    const projects = Object.values(projectS)
 </script>
