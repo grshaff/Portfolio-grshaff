@@ -1,6 +1,13 @@
 @import '@fontsource-variable/roboto';
 @import "tailwindcss";
 @import "tailwindcss-primeui";
+/* Preline UI */
+@source "./node_modules/preline/dist/*.js";
+@import "./node_modules/preline/variants.css";
+
+/* Plugins */
+@plugin "@tailwindcss/forms";
+
 
 @property --border-angle {
     syntax: '<angle>';

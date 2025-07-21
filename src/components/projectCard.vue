@@ -56,9 +56,10 @@
             <h3 class="text-lg font-medium font-roboto sm:text-lg @lg:mt-10">
               <a href="#" class="hover:underline">{{ projectName }}</a>
             </h3>
-            <p class="text-sm text-gray-500 ">
+            <p class="text-sm text-gray-500 line-clamp-2">
               {{ projectDesc }}
             </p>
+            <span class="hidden block" aria-hidden="true">&middot;</span>
           </div>
         </div>
       </article>

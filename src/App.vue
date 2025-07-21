@@ -49,6 +49,7 @@ watchEffect(() => {
   <div class="flex flex-col min-h-screen">
     <div :class="['sticky top-0 z-50 bg-white transition-opacity duration-300', isScrolled ? 'opacity-80' : 'opacity-100']">
       <navBar :current-path="currentPath" />
+      <hr :class="['border-t border-gray-300', isScrolled ? 'hidden' : 'block']">
     </div>
     <main class="flex-grow">
       <component :is="currentRoute.component" />
