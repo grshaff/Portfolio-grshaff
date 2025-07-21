@@ -14,7 +14,6 @@
               <div class="relative grow overflow-hidden min-h-50 min-w-64 w-full lg:min-h-80 xl:min-h-100 bg-white rounded-lg">
                 <div class="hs-carousel-body absolute top-0 bottom-0 start-0 w-full flex flex-nowrap transition-transform duration-700">
                   <div class="hs-carousel-slide w-full flex-shrink-0">
-                    <!-- Removed padding and centering, made image fill container -->
                     <div 
                       @click="showModal('https://cdn-imgix.headout.com/media/images/c9db3cea62133b6a6bb70597326b4a34-388-dubai-img-worlds-of-adventure-tickets-01.jpg?auto=format&w=1222.3999999999999&h=687.6&q=90&fit=crop&ar=16%3A9&crop=faces')" 
                       class="cursor-pointer w-full h-full relative"
@@ -27,8 +26,10 @@
                     </div>
                   </div>
                   <div class="hs-carousel-slide w-full flex-shrink-0">
-                    <!-- Example with another image -->
-                    <div class="w-full h-full relative">
+                    <div 
+                      @click="showModal('')"
+                      class="cursor-pointer w-full h-full relative"
+                    >
                       <img 
                         src="" 
                         class="w-full h-full object-cover transition duration-700 rounded-lg"
@@ -37,8 +38,10 @@
                     </div>
                   </div>
                   <div class="hs-carousel-slide w-full flex-shrink-0">
-                    <!-- Example with third image -->
-                    <div class="w-full h-full relative">
+                    <div 
+                      @click="showModal('')"
+                      class="cursor-pointer w-full h-full relative"
+                    >
                       <img 
                         src="" 
                         class="w-full h-full object-cover transition duration-700 rounded-lg"
@@ -108,27 +111,93 @@
           </div>
         </div>
         
-        <!-- Modal -->
+        <!-- Enhanced Modal with Zoom -->
         <div 
           ref="modal" 
           id="modal"
-          class="hidden fixed top-0 left-0 z-50 w-screen h-screen bg-black/70 flex justify-center items-center"
+          class="hidden fixed top-0 left-0 z-50 w-screen h-screen bg-black/90 flex justify-center items-center"
+          @click="handleModalClick"
         >
           <!-- Close button -->
           <button 
-            class="fixed z-60 top-6 right-8 text-white text-5xl font-bold hover:text-gray-300 transition-colors" 
-            @click="closeModal()"
+            class="fixed z-60 top-6 right-8 text-white text-4xl font-bold hover:text-gray-300 transition-colors bg-black/50 rounded-full w-12 h-12 flex items-center justify-center" 
+            @click="closeModal"
           >
             &times;
           </button>
-          <!-- Modal image -->
-          <div class="h-full flex items-center justify-center p-4">
+          
+          <!-- Zoom controls -->
+          <div class="fixed z-60 top-6 left-8 flex gap-2">
+            <button 
+              @click="zoomIn"
+              class="text-white bg-black/50 hover:bg-black/70 rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              title="Zoom In"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+            </button>
+            <button 
+              @click="zoomOut"
+              class="text-white bg-black/50 hover:bg-black/70 rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              title="Zoom Out"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
+              </svg>
+            </button>
+            <button 
+              @click="resetZoom"
+              class="text-white bg-black/50 hover:bg-black/70 rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              title="Reset Zoom"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Zoom level indicator -->
+          <div 
+            v-if="zoomLevel !== 1"
+            class="fixed z-60 bottom-6 left-1/2 transform -translate-x-1/2 text-white bg-black/50 px-3 py-1 rounded-full text-sm"
+          >
+            {{ Math.round(zoomLevel * 100) }}%
+          </div>
+          
+          <!-- Modal image container -->
+          <div 
+            ref="imageContainer"
+            class="relative w-full h-full flex items-center justify-center overflow-hidden"
+            @mousedown="startPan"
+            @mousemove="handlePan"
+            @mouseup="endPan"
+            @mouseleave="endPan"
+            @wheel="handleWheel"
+          >
             <img 
               ref="modalImg" 
               id="modal-img" 
-              class="max-w-full max-h-full object-contain" 
+              class="max-w-none transition-transform duration-300 ease-out select-none"
+              :class="[
+                zoomLevel > 1 ? 'cursor-move' : 'cursor-zoom-in',
+                isDragging ? 'cursor-grabbing' : ''
+              ]"
+              :style="{
+                transform: `scale(${zoomLevel}) translate(${panX}px, ${panY}px)`,
+                transformOrigin: 'center center'
+              }"
+              @click="handleImageClick"
+              @dragstart="$event.preventDefault()"
               alt="Modal Image"
             />
+          </div>
+          
+          <!-- Instructions -->
+          <div class="fixed z-60 bottom-6 right-8 text-white text-sm bg-black/50 px-3 py-2 rounded-lg">
+            <div>Click image to zoom</div>
+            <div>Scroll to zoom</div>
+            <div v-if="zoomLevel > 1">Drag to pan</div>
           </div>
         </div>
         
@@ -170,14 +239,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-// Reference for modal and modal image
+// Modal and image references
 const modal = ref(null)
 const modalImg = ref(null)
+const imageContainer = ref(null)
+
+// Zoom and pan state
+const zoomLevel = ref(1)
+const panX = ref(0)
+const panY = ref(0)
+const isDragging = ref(false)
+const lastMouseX = ref(0)
+const lastMouseY = ref(0)
+
+// Zoom levels
+const minZoom = 0.5
+const maxZoom = 3
+const zoomStep = 0.5
 
 function showModal(src) {
-  console.log("clicked")
+  console.log("Modal opened")
   if (modal.value) {
     modal.value.classList.remove('hidden')
     modal.value.classList.add('flex')
@@ -185,6 +268,8 @@ function showModal(src) {
   if (modalImg.value) {
     modalImg.value.src = src
   }
+  // Reset zoom and pan when opening modal
+  resetZoom()
 }
 
 function closeModal() {
@@ -192,15 +277,116 @@ function closeModal() {
     modal.value.classList.add('hidden')
     modal.value.classList.remove('flex')
   }
+  resetZoom()
 }
 
-// Close modal on escape key
-onMounted(() => {
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal()
+function handleModalClick(event) {
+  // Close modal if clicking on the background (not the image)
+  if (event.target === modal.value || event.target === imageContainer.value) {
+    closeModal()
+  }
+}
+
+function handleImageClick(event) {
+  event.stopPropagation()
+  // Toggle zoom on image click
+  if (zoomLevel.value === 1) {
+    zoomIn()
+  } else {
+    resetZoom()
+  }
+}
+
+function zoomIn() {
+  if (zoomLevel.value < maxZoom) {
+    zoomLevel.value = Math.min(zoomLevel.value + zoomStep, maxZoom)
+  }
+}
+
+function zoomOut() {
+  if (zoomLevel.value > minZoom) {
+    zoomLevel.value = Math.max(zoomLevel.value - zoomStep, minZoom)
+    // Reset pan if zoomed out completely
+    if (zoomLevel.value === 1) {
+      panX.value = 0
+      panY.value = 0
     }
-  })
+  }
+}
+
+function resetZoom() {
+  zoomLevel.value = 1
+  panX.value = 0
+  panY.value = 0
+}
+
+function handleWheel(event) {
+  event.preventDefault()
+  const delta = event.deltaY > 0 ? -0.2 : 0.2
+  const newZoom = Math.max(minZoom, Math.min(maxZoom, zoomLevel.value + delta))
+  zoomLevel.value = newZoom
+  
+  if (zoomLevel.value === 1) {
+    panX.value = 0
+    panY.value = 0
+  }
+}
+
+function startPan(event) {
+  if (zoomLevel.value > 1) {
+    isDragging.value = true
+    lastMouseX.value = event.clientX
+    lastMouseY.value = event.clientY
+  }
+}
+
+function handlePan(event) {
+  if (isDragging.value && zoomLevel.value > 1) {
+    const deltaX = event.clientX - lastMouseX.value
+    const deltaY = event.clientY - lastMouseY.value
+    
+    panX.value += deltaX / zoomLevel.value
+    panY.value += deltaY / zoomLevel.value
+    
+    lastMouseX.value = event.clientX
+    lastMouseY.value = event.clientY
+  }
+}
+
+function endPan() {
+  isDragging.value = false
+}
+
+// Keyboard shortcuts
+function handleKeydown(event) {
+  if (modal.value && !modal.value.classList.contains('hidden')) {
+    switch (event.key) {
+      case 'Escape':
+        closeModal()
+        break
+      case '+':
+      case '=':
+        event.preventDefault()
+        zoomIn()
+        break
+      case '-':
+        event.preventDefault()
+        zoomOut()
+        break
+      case '0':
+        event.preventDefault()
+        resetZoom()
+        break
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
@@ -214,5 +400,19 @@ onMounted(() => {
 .hs-carousel-slide {
   width: 100%;
   flex-shrink: 0;
+}
+
+/* Custom cursor styles */
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+/* Smooth transitions */
+.transition-transform {
+  transition: transform 0.3s ease-out;
 }
 </style>
