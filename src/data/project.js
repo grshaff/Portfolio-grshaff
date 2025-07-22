@@ -76,15 +76,15 @@ export const projectS = {
     id: "ebike", 
     name: "E-Bike Landing Page",
     logo: "../",
-    desc: "Web to monitor trash capacity in Bandung, connects with IoT developement", 
-    longDesc: "IoT-connected web application for monitoring trash bin capacity across Bandung city, providing real-time data and analytics for waste management optimization.",
-    techStack: "Vue.js, IoT Sensors, Firebase",
-    img1: "your-img-1-path",
-    img2: "your-img-2-path", 
+    desc: "A sleek, responsive landing page for ReCycle e-bikes.", 
+    longDesc: "A visually engaging landing page designed for an electric bicycle brand, ReCycle. The page is developed using HTML, CSS, and Bootstrap for responsive design, ensuring compatibility across various devices. JavaScript is integrated to create smooth animations, enhancing user interaction and overall user experience. The website showcases the key features and benefits of the e-bikes, aiming to attract environmentally-conscious consumers.",
+    techStack: "HTML, JavaScript, CSS, Bootstrap5",
+    img1: imgBike,
+    img2: '../assets/projects-img/e-bike/1.webp', 
     img3: "your-img-3-path",
     status: true,
     webStatus: true,
-    url: "#/",
+    url: "https://e-bikedemo.vercel.app/#",
   }
 }
 
@@ -103,3 +103,5 @@ export const getActiveProjects = () => {
 export const getInactiveProjects = () => {
   return Object.values(projectS).filter(project => project.status === false)
 }
+
+import imgBike from '../assets/projects-img/e-bike/1.webp'
