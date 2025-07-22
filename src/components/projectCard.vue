@@ -1,6 +1,6 @@
 <template>
     <div class="grow-1 hidden"></div>
-    <a href="/#" class="rounded-xl border-2 border-gray-100 bg-white w-70 mx-0 grow-10 md:grow-12 lg:grow-15 mb-5 @container">
+    <a :href="'#/project/' + projectId" class="rounded-xl border-2 border-gray-100 bg-white w-70 mx-0 grow-10 md:grow-12 lg:grow-15 mb-5 @container">
       <article >
         <div class="flex justify-end">
           <strong
@@ -54,7 +54,7 @@
           />
           <div>
             <h3 class="text-lg font-medium font-roboto sm:text-lg @lg:mt-10">
-              <a href="#" class="hover:underline">{{ projectName }}</a>
+              <a :href="'#/project/' + projectId" class="hover:underline">{{ projectName }}</a>
             </h3>
             <p class="text-sm text-gray-500 line-clamp-2">
               {{ projectDesc }}
@@ -69,6 +69,7 @@
   
   <script setup>
   defineProps({
+    projectId: String,
     projectLogo: String,
     projectName: String,
     projectDesc: String,
