@@ -117,8 +117,8 @@
               Tech Stack: <span class="font-light">{{ techStack }}</span>
             </p>
           </div>
-          <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
-            <a :href="url" title="" class="w-full flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-200 focus:outline-none bg-black rounded-xl border border-gray-200 hover:text-white focus:z-10 focus:ring-4 focus:ring-gray-100 transition-colors" role="button">
+          <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8" :class="webStatus ? 'visible' : 'invisible'">
+            <a target="_blank" :href="url" title="" class="w-full flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-400 focus:outline-none bg-black rounded-xl border border-gray-200 hover:text-white focus:z-10 focus:ring-4 focus:ring-gray-100 transition-colors" role="button">
               Visit website
             </a>
           </div>
@@ -147,6 +147,7 @@ defineProps({
   img2: String,
   img3: String,
   status: Boolean,
+  webStatus: Boolean,
   url: String
 })
 
