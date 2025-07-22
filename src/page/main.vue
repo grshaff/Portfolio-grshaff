@@ -9,7 +9,7 @@
                 <h3 class="font-medium text-gray-900 text-lg md:text-[24px] lg:text-[30px] font-roboto">Software Engineer</h3>
             
                 <p class="mt-0.5 text-gray-700 text-[12px] md:text-[18px] lg:text-[20px] font-roboto">
-                    Hey, I’m Giri Shaffaat. <br>In my free time, I design & develop apps to make my life easier.
+                    Hey, I’m Giri Shaffaat. <br>I design & develop apps to make my life easier.
                 </p>
             </div>
         </div>
@@ -31,7 +31,7 @@
             <h1 class="font-roboto font-medium text-gray-900 text-lg md:text-[24px] lg:text-[30px]">Projects</h1>
             <h2 class="mt-0.5 text-gray-700 text-[12px] md:text-[18px] lg:text-[20px] font-roboto">Recent projects I've worked on</h2>
         </div>
-        <div class="flex flex-wrap mx-auto " >
+        <div class="flex flex-wrap mx-auto me-4 md:me-8 gap-5 xl:me-14" >
             <projectCard
                 v-for="(project, index) in projects"
                 :key="index"
@@ -56,6 +56,9 @@
             name: "enjoyreads",
             logo: "../",
             desc: "A web application to read PDFs and ePUBs as books",
+            LongDesc: "",
+            techStack: "",
+            imgThumbnail: [""],
             status: false,
             URL: "#/",
         },
@@ -64,6 +67,9 @@
             name: "reviewmycv",
             logo: "../",
             desc: "Quick CV reviewer built with AI to analyze and fix your resume.",
+            LongDesc: "",
+            techStack: "",
+            imgThumbnail: [""],
             status: false,
             URL: "#/",
         },
@@ -72,6 +78,9 @@
             name: "Shift Generator",
             logo: "../",
             desc: "Tool for generating shift schedules, creates excel as output",
+            LongDesc: "",
+            techStack: "",
+            imgThumbnail: [""],
             status: true,
             URL: "#/",
         },
@@ -80,6 +89,9 @@
             name: "Bandung TPS Monitor",
             logo: "../",
             desc: "Web to monitor trash capacity in Bandung, connects with IoT developement",
+            LongDesc: "",
+            techStack: "",
+            imgThumbnail: [""],
             status: true,
             URL: "#/",
         }

@@ -15,11 +15,11 @@
                 <div class="hs-carousel-body absolute top-0 bottom-0 start-0 w-full flex flex-nowrap transition-transform duration-700">
                   <div class="hs-carousel-slide w-full flex-shrink-0">
                     <div 
-                      @click="showModal('https://cdn-imgix.headout.com/media/images/c9db3cea62133b6a6bb70597326b4a34-388-dubai-img-worlds-of-adventure-tickets-01.jpg?auto=format&w=1222.3999999999999&h=687.6&q=90&fit=crop&ar=16%3A9&crop=faces')" 
+                      @click="showModal(Img1)" 
                       class="cursor-pointer w-full h-full relative"
                     >
                       <img 
-                        src='https://cdn-imgix.headout.com/media/images/c9db3cea62133b6a6bb70597326b4a34-388-dubai-img-worlds-of-adventure-tickets-01.jpg?auto=format&w=1222.3999999999999&h=687.6&q=90&fit=crop&ar=16%3A9&crop=faces' 
+                        :src=Img1 
                         class="w-full h-full object-cover transition duration-700 rounded-lg"
                         alt="Product Image"
                       />
@@ -27,11 +27,11 @@
                   </div>
                   <div class="hs-carousel-slide w-full flex-shrink-0">
                     <div 
-                      @click="showModal('')"
+                      @click="showModal(Img2)"
                       class="cursor-pointer w-full h-full relative"
                     >
                       <img 
-                        src="" 
+                        :src=Img2 
                         class="w-full h-full object-cover transition duration-700 rounded-lg"
                         alt="Second Image"
                       />
@@ -39,11 +39,11 @@
                   </div>
                   <div class="hs-carousel-slide w-full flex-shrink-0">
                     <div 
-                      @click="showModal('')"
+                      @click="showModal(Img3)"
                       class="cursor-pointer w-full h-full relative"
                     >
                       <img 
-                        src="" 
+                        :src=Img3 
                         class="w-full h-full object-cover transition duration-700 rounded-lg"
                         alt="Third Image"
                       />
@@ -81,7 +81,7 @@
                   <div class="hs-carousel-pagination-item shrink-0 border border-gray-200 rounded-md overflow-hidden cursor-pointer size-20 hs-carousel-active:border-blue-400 hover:border-blue-300 transition-colors">
                     <div class="size-full">
                       <img 
-                        src='https://cdn-imgix.headout.com/media/images/c9db3cea62133b6a6bb70597326b4a34-388-dubai-img-worlds-of-adventure-tickets-01.jpg?auto=format&w=80&h=80&q=90&fit=crop' 
+                        :src=Img1
                         class="w-full h-full object-cover"
                         alt="Thumbnail 1"
                       />
@@ -90,7 +90,7 @@
                   <div class="hs-carousel-pagination-item shrink-0 border border-gray-200 rounded-md overflow-hidden cursor-pointer size-20 hs-carousel-active:border-blue-400 hover:border-blue-300 transition-colors">
                     <div class="size-full">
                       <img 
-                        src="" 
+                        :src=Img2 
                         class="w-full h-full object-cover"
                         alt="Thumbnail 2"
                       />
@@ -99,7 +99,7 @@
                   <div class="hs-carousel-pagination-item shrink-0 border border-gray-200 rounded-md overflow-hidden cursor-pointer size-20 hs-carousel-active:border-blue-400 hover:border-blue-300 transition-colors">
                     <div class="size-full">
                       <img 
-                        src="" 
+                        :src=Img3 
                         class="w-full h-full object-cover"
                         alt="Thumbnail 3"
                       />
@@ -204,19 +204,18 @@
         <!-- Product details -->
         <div class="lg:max-w-sm mt-6 sm:mt-8 lg:mt-0 xl:min-w-sm 2xl:min-w-xl">
           <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">
-            Apple iMac 24" All-In-One Computer, Apple M1, 8GB RAM, 256GB SSD,
-            Mac OS, Pink
+            {{Name}}
           </h1>
           
           <div class="mt-4 sm:items-center sm:gap-4 sm:flex">
             <p class="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-              Tech Stack:
+              Tech Stack: {{ TechStack }}
             </p>
           </div>
           
           <div class="mt-6 sm:gap-4 sm:items-center sm:flex sm:mt-8">
             <a
-              href="#"
+              :href="URL"
               title=""
               class="w-full flex items-center justify-center py-2.5 px-5 text-sm font-medium text-gray-200 focus:outline-none bg-black rounded-xl border border-gray-200 hover:text-white focus:z-10 focus:ring-4 focus:ring-gray-100 transition-colors"
               role="button"
@@ -228,9 +227,7 @@
           <hr class="my-6 md:my-8 border-gray-200 dark:border-gray-800" />
           
           <p class="mb-6 text-gray-500 dark:text-gray-400">
-            Studio quality three mic array for crystal clear calls and voice
-            recordings. Six-speaker sound system for a remarkably robust and
-            high-quality audio experience. Up to 256GB of ultrafast SSD storage.
+            {{LongDesc}}
           </p>
         </div>
       </div>
@@ -241,6 +238,17 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
+
+// Define props
+defineProps({
+  Name: String,
+  Img1: String,
+  Img2: String,
+  Img3: String,
+  TechStack: String,
+  LongDesc: String,
+  URL: String
+})
 // Modal and image references
 const modal = ref(null)
 const modalImg = ref(null)

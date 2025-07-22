@@ -64,7 +64,7 @@
         </div>
       </article>
     </a>
-    <div class="grow me-4 md:me-8 lg:grow-0 md:grow-0"></div>
+    <div class="hidden grow me-4 md:me-8 lg:grow-0 md:grow-0"></div>
   </template>
   
   <script setup>
