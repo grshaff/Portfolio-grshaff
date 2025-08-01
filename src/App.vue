@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect, onMounted, onUnmounted, markRaw} from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted, markRaw, nextTick} from 'vue'
 import navBar from './components/navBar.vue'
 import FooterD from './components/footer.vue'
 import ProjectDetail from './components/project-detail.vue'
@@ -30,29 +30,52 @@ const routes = {
 }
 
 const currentPath = ref(window.location.hash || '#/')
-window.addEventListener('hashchange', () => {
-  currentPath.value = window.location.hash || '#/'
+const componentKey = ref(0) // ✅ Force component re-render
+
+// ✅ Track if we're currently showing project detail
+const isShowingProjectDetail = ref(false)
+
+const updateCurrentPath = () => {
+  const newPath = window.location.hash || '#/'
+  const wasShowingProject = isShowingProjectDetail.value
+  
+  // Check if we're navigating away from project detail
+  const newPathParts = newPath.slice(1).split('/')
+  const isNewPathProject = newPathParts[1] === 'project' && newPathParts[2]
+  
+  // If we were showing project detail and now we're not, force component destruction
+  if (wasShowingProject && !isNewPathProject) {
+    componentKey.value++ // Force component re-render
+  }
+  
+  currentPath.value = newPath
+  isShowingProjectDetail.value = isNewPathProject
+}
+
+onMounted(() => {
+  window.addEventListener('hashchange', updateCurrentPath)
+  // Check initial state
+  const initialParts = currentPath.value.slice(1).split('/')
+  isShowingProjectDetail.value = initialParts[1] === 'project' && initialParts[2]
 })
 
-const currentHash = ref(window.location.hash || '#/')
-onMounted(() => {
-  window.addEventListener('hashchange', () => {
-    currentHash.value = window.location.hash || '#/'
-  })
+onUnmounted(() => {
+  window.removeEventListener('hashchange', updateCurrentPath)
 })
 
 const currentRoute = computed(() => {
-  const path = currentHash.value.slice(1) // remove '#'
-  const parts = path.split('/') // Dynamic project detail route
+  const path = currentPath.value.slice(1) // remove '#'
+  const parts = path.split('/') 
   
+  // Dynamic project detail route    
   if (parts[1] === 'project' && parts[2]) {
-    // Use the helper function to get project by ID
     const project = getProjectById(parts[2])
     if (project) {
       return {
         component: markRaw(ProjectDetail),
         props: project,
-        title: `${project.name} | Project Detail`
+        title: `${project.name} | Project Detail`,
+        isProjectDetail: true
       }
     }
   }
@@ -60,7 +83,8 @@ const currentRoute = computed(() => {
   // Static route
   return routes[`/${parts[1] || ''}`] || {
     component: { template: '<div class="text-center text-red-600 p-8">404 - Page Not Found</div>' },
-    title: '404 | Not Found'
+    title: '404 | Not Found',
+    isProjectDetail: false
   }
 })
 
@@ -68,16 +92,33 @@ const currentRoute = computed(() => {
 watchEffect(() => {
   document.title = currentRoute.value.title
 })
+
+// ✅ Function to handle navbar navigation
+const handleNavbarNavigation = () => {
+  if (isShowingProjectDetail.value) {
+    // Force component destruction when navigating away from project detail
+    componentKey.value++
+    isShowingProjectDetail.value = false
+  }
+}
 </script>
 
 <template>
   <div class="flex flex-col min-h-screen">
-    <div :class="['sticky top-0 z-50 bg-white transition-opacity duration-300', isScrolled ? 'opacity-80' : 'opacity-100']">
-      <navBar :current-path="currentPath" />
+    <div :class="['sticky top-0 z-50 bg-white transition-opacity duration-300', isScrolled ? 'opacity-100' : 'opacity-100']">
+      <navBar 
+        :current-path="currentPath" 
+        @navbar-click="handleNavbarNavigation"
+      />
       <hr :class="['border-t border-gray-300', isScrolled ? 'hidden' : 'block']">
     </div>
     <main class="flex-grow">
-      <component :is="currentRoute.component" v-bind="currentRoute.props || {}" />
+      <!-- ✅ Use key to force component destruction -->
+      <component 
+        :is="currentRoute.component" 
+        :key="currentRoute.isProjectDetail ? `project-${componentKey}` : `page-${componentKey}`"
+        v-bind="currentRoute.props || {}" 
+      />
     </main>
     <FooterD />
   </div>
