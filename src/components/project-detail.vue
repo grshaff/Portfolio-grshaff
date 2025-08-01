@@ -5,7 +5,7 @@
         <div
           class="grow sm:max-w-md md:max-w-xl xl:max-w-4xl w-full mx-auto lg:max-w-3xl"
         >
-          <!-- Slider -->
+          <!-- Slider (Remains the same) -->
           <div
             data-hs-carousel='{ "loadingClasses": "opacity-0" }'
             class="relative"
@@ -151,7 +151,7 @@
           @click="handleModalClick"
         >
           <button
-            class="fixed z-60 top-6 right-8 text-white text-4xl font-bold hover:text-gray-300 transition-colors bg-black/50 rounded-full w-12 h-12 flex items-center justify-center"
+            class="fixed z-60 top-6 right-8 text-white text-4xl font-bold hover:text-gray-300 transition-colors w-12 h-12 flex items-center justify-center"
             @click="closeModal"
           >
             &times;
@@ -216,10 +216,10 @@
             </button>
           </div>
           <div
-            v-if="currentZoom > baseZoom"
+            v-if="scale !== currentDefaultScale"
             class="fixed z-60 bottom-6 left-1/2 transform -translate-x-1/2 text-white bg-black/50 px-3 py-1 rounded-full text-sm"
           >
-            {{ Math.round((currentZoom / baseZoom) * 100) }}%
+            {{ Math.round(scale * 100) }}%
           </div>
           <div
             ref="imageContainer"
@@ -235,11 +235,11 @@
               id="modal-img"
               class="max-w-none transition-transform duration-300 ease-out select-none"
               :class="[
-                currentZoom > baseZoom ? 'cursor-move' : 'cursor-zoom-in',
+                scale > currentDefaultScale ? 'cursor-move' : 'cursor-zoom-in',
                 isDragging ? 'cursor-grabbing' : '',
               ]"
               :style="{
-                transform: `scale(${currentZoom / baseZoom}) translate(${panX}px, ${panY}px)`,
+                transform: `scale(${scale}) translate(${panX}px, ${panY}px)`,
                 transformOrigin: 'center center',
               }"
               @click="handleImageClick"
@@ -253,11 +253,11 @@
           >
             <div>Click image to zoom</div>
             <div>Scroll to zoom</div>
-            <div v-if="currentZoom > baseZoom">Drag to pan</div>
+            <div v-if="scale > currentDefaultScale">Drag to pan</div>
           </div>
         </div>
         
-        <!-- Product details -->
+        <!-- Product details (Remains the same) -->
         <div class="lg:max-w-sm mt-6 sm:mt-8 lg:mt-0 xl:min-w-sm 2xl:min-w-xl">
           <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">
             {{ name }}
@@ -293,9 +293,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 
-// ✅ Define props with correct names matching your data structure
+// Define props with correct names matching your data structure
 defineProps({
   id: String,
   name: String,
@@ -311,37 +311,50 @@ defineProps({
   url: String,
 });
 
-// ✅ Define all reactive variables
+// DOM element references
 const modal = ref(null);
 const modalImg = ref(null);
 const imageContainer = ref(null);
-const currentZoom = ref(1);
-const baseZoom = ref(1);
+
+// Zoom and pan state
+const scale = ref(1); // This is the actual CSS transform scale value
 const panX = ref(0);
 const panY = ref(0);
 const isDragging = ref(false);
 const lastMouseX = ref(0);
 const lastMouseY = ref(0);
-const isMobile = ref(false);
 
-// ✅ Constants
-const minZoom = 0.5;
-const maxZoom = 3;
-const zoomStep = 0.5;
+// Responsive state - now tracks actual screen width
+const screenWidth = ref(0);
 
-// ✅ Detect mobile device
-function detectMobile() {
-  isMobile.value =
-    window.innerWidth <= 768 ||
-    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+// Constants for zoom behavior
+const MIN_ABS_SCALE = 0.1; // Absolute minimum zoom level (10% of original size)
+const MAX_ABS_SCALE = 5.0; // Absolute maximum zoom level (500% of original size)
+const ZOOM_FACTOR = 0.1; // How much zoom changes per step (10%)
+
+// Computed property to get the correct default scale based on screen width
+const currentDefaultScale = computed(() => {
+  if (screenWidth.value < 600) {
+    return 0.2;
+  } else if (screenWidth.value >= 600 && screenWidth.value < 900) {
+    return 0.3;
+  } 
+  else if (screenWidth.value >= 900 && screenWidth.value < 1200) {
+    return 0.45;
+  }else { // screenWidth.value >= 900
+    return 0.7;
+  }
+});
+
+// Update screenWidth on resize
+function updateScreenWidth() {
+  screenWidth.value = window.innerWidth;
 }
 
-// ✅ Modal functions
+// Modal functions
 function showModal(src) {
   console.log("Modal opened");
-  detectMobile();
+  updateScreenWidth(); // Ensure screen width is up-to-date immediately
   if (modal.value) {
     modal.value.classList.remove("hidden");
     modal.value.classList.add("flex");
@@ -349,8 +362,8 @@ function showModal(src) {
   }
   if (modalImg.value) {
     modalImg.value.src = src;
+    // handleImageLoad will set the scale once the image is loaded
   }
-  resetZoom();
 }
 
 function closeModal() {
@@ -359,32 +372,15 @@ function closeModal() {
     modal.value.classList.remove("flex");
     document.body.style.overflow = ''; // Restore scrolling
   }
-  resetZoom();
+  resetZoom(); // Reset zoom state when closing modal
 }
 
+// Set the initial scale when the image loads
 function handleImageLoad() {
-  if (modalImg.value && imageContainer.value) {
-    const img = modalImg.value;
-    const container = imageContainer.value;
-    const containerWidth = container.clientWidth - (isMobile.value ? 16 : 32);
-    const containerHeight = container.clientHeight - (isMobile.value ? 16 : 32);
-    const imgWidth = img.naturalWidth;
-    const imgHeight = img.naturalHeight;
-    
-    let scaleX = containerWidth / imgWidth;
-    let scaleY = containerHeight / imgHeight;
-    let scale = Math.min(scaleX, scaleY);
-    
-    // Mobile adjustment
-    if (isMobile.value && scale < 0.6) {
-      scale *= 1.5;
-    }
-    
-    baseZoom.value = scale;
-    currentZoom.value = baseZoom.value;
-    panX.value = 0;
-    panY.value = 0;
-  }
+  scale.value = currentDefaultScale.value; // Set default initial scale based on device
+  panX.value = 0;
+  panY.value = 0;
+  console.log('Image loaded, setting initial scale to:', scale.value);
 }
 
 function handleModalClick(event) {
@@ -395,58 +391,42 @@ function handleModalClick(event) {
 
 function handleImageClick(event) {
   event.stopPropagation();
-  if (currentZoom.value === baseZoom.value) {
+  if (scale.value === currentDefaultScale.value) {
     zoomIn();
   } else {
     resetZoom();
   }
 }
 
-// ✅ Zoom functions
+// Zoom functions
 function zoomIn() {
-  const maxZoomLevel = baseZoom.value * (isMobile.value ? 8 : 4);
-  const newZoom = Math.min(
-    currentZoom.value + baseZoom.value * zoomStep,
-    maxZoomLevel
-  );
-  currentZoom.value = newZoom;
+  scale.value = Math.min(scale.value + ZOOM_FACTOR, MAX_ABS_SCALE);
 }
 
 function zoomOut() {
-  const minZoomLevel = baseZoom.value * minZoom;
-  if (currentZoom.value > minZoomLevel) {
-    currentZoom.value = Math.max(currentZoom.value - baseZoom.value * zoomStep, minZoomLevel);
-    if (currentZoom.value === baseZoom.value) {
-      panX.value = 0;
-      panY.value = 0;
-    }
-  }
+  scale.value = Math.max(scale.value - ZOOM_FACTOR, MIN_ABS_SCALE);
 }
 
 function resetZoom() {
-  currentZoom.value = baseZoom.value;
+  scale.value = currentDefaultScale.value; // Reset to the desired default scale based on device
   panX.value = 0;
   panY.value = 0;
 }
 
 function handleWheel(event) {
   event.preventDefault();
-  const delta = event.deltaY > 0 ? -0.2 : 0.2;
-  const newZoom = Math.max(
-    baseZoom.value * minZoom, 
-    Math.min(baseZoom.value * maxZoom, currentZoom.value + delta * baseZoom.value)
-  );
-  currentZoom.value = newZoom;
+  const delta = event.deltaY > 0 ? -ZOOM_FACTOR : ZOOM_FACTOR;
+  scale.value = Math.max(MIN_ABS_SCALE, Math.min(MAX_ABS_SCALE, scale.value + delta));
   
-  if (currentZoom.value === baseZoom.value) {
+  if (scale.value === currentDefaultScale.value) {
     panX.value = 0;
     panY.value = 0;
   }
 }
 
-// ✅ Pan functions
+// Pan functions
 function startPan(event) {
-  if (currentZoom.value > baseZoom.value) {
+  if (scale.value > currentDefaultScale.value) { // Only allow pan if zoomed in beyond default
     isDragging.value = true;
     lastMouseX.value = event.clientX;
     lastMouseY.value = event.clientY;
@@ -454,11 +434,12 @@ function startPan(event) {
 }
 
 function handlePan(event) {
-  if (isDragging.value && currentZoom.value > baseZoom.value) {
+  if (isDragging.value && scale.value > currentDefaultScale.value) {
     const deltaX = event.clientX - lastMouseX.value;
     const deltaY = event.clientY - lastMouseY.value;
-    panX.value += deltaX / (currentZoom.value / baseZoom.value);
-    panY.value += deltaY / (currentZoom.value / baseZoom.value);
+    // Adjust pan based on current scale, so it feels natural regardless of zoom level
+    panX.value += deltaX / scale.value; 
+    panY.value += deltaY / scale.value;
     lastMouseX.value = event.clientX;
     lastMouseY.value = event.clientY;
   }
@@ -468,7 +449,7 @@ function endPan() {
   isDragging.value = false;
 }
 
-// ✅ Keyboard handling
+// Keyboard handling
 function handleKeydown(event) {
   if (modal.value && !modal.value.classList.contains("hidden")) {
     switch (event.key) {
@@ -492,30 +473,36 @@ function handleKeydown(event) {
   }
 }
 
-// ✅ Lifecycle hooks with proper cleanup
+// Lifecycle hooks with proper cleanup
 onMounted(() => {
   document.addEventListener("keydown", handleKeydown);
-  detectMobile();
+  window.addEventListener("resize", updateScreenWidth); // Listen for resize to update screen width
+  updateScreenWidth(); // Initial detection on mount
+  console.log('Project detail component mounted');
 });
 
 onBeforeUnmount(() => {
-
+  console.log('Project detail component unmounting - cleaning up');
   document.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("resize", updateScreenWidth); // Clean up resize listener
   
-  // ✅ Clean up modal state
+  // Clean up modal state
   if (modal.value && !modal.value.classList.contains("hidden")) {
-    closeModal();
+    closeModal(); // This will also call resetZoom and restore body scroll
+  } else {
+    // If modal was already hidden, just ensure scroll is restored and state is reset
+    document.body.style.overflow = '';
+    resetZoom();
   }
-  
-  // ✅ Restore body scroll
-  document.body.style.overflow = '';
-  
-  // ✅ Reset all reactive state
-  currentZoom.value = 1;
-  baseZoom.value = 1;
-  panX.value = 0;
-  panY.value = 0;
-  isDragging.value = false;
+});
+
+// Watch for changes in screenWidth and adjust zoom if modal is open
+watch(screenWidth, (newVal, oldVal) => {
+  if (modal.value && !modal.value.classList.contains("hidden")) {
+    // If modal is open and screen width changes (e.g., user resizes window)
+    // Re-apply the correct default zoom
+    resetZoom();
+  }
 });
 </script>
 
